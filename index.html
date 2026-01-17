@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Kalp Şöleni</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Arka plandaki yükselen kalpler */
+        .floating-heart {
+            position: absolute;
+            bottom: -50px;
+            cursor: default;
+            user-select: none;
+            animation: float linear forwards;
+            filter: drop-shadow(0 0 5px currentColor);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Ana Atan Kalp Konteynırı */
+        .main-container {
+            text-align: center;
+            z-index: 10;
+        }
+
+        /* CSS ile çizilen Büyük Kalp */
+        .heart {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: #ff0055;
+            transform: rotate(-45deg);
+            margin: 0 auto;
+            cursor: pointer;
+            animation: beat 0.8s infinite alternate;
+            box-shadow: 0 0 50px #ff0055;
+            transition: transform 0.3s ease;
+        }
+
+        .heart::before, .heart::after {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: #ff0055;
+            border-radius: 50%;
+        }
+
+        .heart::before { top: -50px; left: 0; }
+        .heart::after { left: 50px; top: 0; }
+
+        @keyframes beat {
+            0% { transform: scale(1) rotate(-45deg); }
+            100% { transform: scale(1.2) rotate(-45deg); filter: hue-rotate(20deg); }
+        }
+
+        /* Kalbin altındaki yazı */
+        .message {
+            margin-top: 80px;
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 0 10px #ff0055;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .heart:active {
+            transform: scale(0.9) rotate(-45deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="heart" onclick="showMessage()"></div>
+        <div class="message" id="msgText">Seni Seviyorum! ❤️</div>
+    </div>
+
+    <script>
+        // Rastgele yükselen kalpler oluşturma
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            const colors = ['#ff0055', '#ff6b6b', '#ff4d4d', '#f06292', '#ba68c8'];
+            
+            heart.innerHTML = '❤️';
+            heart.className = 'floating-heart';
+            
+            // Rastgele özellikler
+            const leftPos = Math.random() * 100;
+            const size = Math.random() * 20 + 10;
+            const duration = Math.random() * 3 + 4;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            heart.style.left = leftPos + 'vw';
+            heart.style.fontSize = size + 'px';
+            heart.style.animationDuration = duration + 's';
+            heart.style.color = color;
+            
+            document.body.appendChild(heart);
+
+            // Animasyon bitince elementin silinmesi
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }
+
+        // Her 200 milisaniyede bir yeni kalp ekle
+        setInterval(createFloatingHeart, 200);
+
+        // Kalbe tıklandığında mesaj göster
+        function showMessage() {
+            const msg = document.getElementById('msgText');
+            msg.style.opacity = '1';
+            setTimeout(() => {
+                msg.style.opacity = '0';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
