@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Hızlanan Abla Runner</title>
+    <title>Super Nola</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fdfbfb; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         canvas { display: block; background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%); }
@@ -52,7 +52,7 @@
 <div id="compliment-container"></div>
 
 <div id="msg" onclick="resetGame()">
-    <div style="font-weight: bold;">Harika bir denemeydi abla! 🌸</div>
+    <div style="font-weight: bold;">Hata yapabilirsin sorun değil tekrar dene! 🌸</div>
     <button class="restart-btn">Tekrar Başla</button>
 </div>
 <canvas id="game"></canvas>
@@ -69,8 +69,23 @@ let w, h, laneW, player, obstacles, score, gameActive, speed;
 let lastMilestone = 0;
 
 const compliments = [
-    "Mükemmel gidiyorsun abla! ✨", "Ablam bir numara! 💖", "Çok zarif oynuyorsun 🌸",
-    "Süpersin abla! 🌟", "Rekor senin olsun! 🏆", "Göz kamaştırıyorsun! 💎"
+   "Mükemmel gidiyorsun abla! ✨", "Ablam bir numara! 💖", "Çok zarif oynuyorsun🌷",
+    "Süpersin abla! 🌟", "Rekor senin olsun! 🏆", "Göz kamaştırıyorsun! 💎",
+    "Efsanesin sen! 🔥", "Harika bir stil! 💅", "İnanılmaz yetenek! 🎈",
+    "Böyle devam et prenses! 👑", "Dünyanın en iyi oyuncusu! 🌍", "Sen bir yıldızsın! ⭐",
+    "Harikasın canım ablam! 🥰", "Gülüşün gibi parlak oynuyorsun! ✨", "Kimse seni geçemez! 🚀",
+    "Zekice hamleler! 🧠", "Işığın her yeri aydınlatıyor! 💡", "Ablaların en güzeli! 🌷",
+    "Seninle oynamak bir şeref! 🎖️", "Hızına yetişilemiyor! ⚡", "Muhteşem bir odaklanma! 🎯",
+    "Kalbinin güzelliği oyuna yansıyor! ❤️", "Oyunun kraliçesi! 👸", "Durdurulamaz bir güç! 💪",
+    "Zarafetinle büyülüyorsun! ✨", "Bravo abla, süper! 👏", "En yüksek puan sana yakışır! 🏅",
+    "Sihirli parmaklar! 🪄", "Geleceğin şampiyonu! 🏁", "Senin enerjin yeter! 🔋",
+    "Sakin ve kararlı! 🌊", "Gökkuşağı gibi renklisin! 🌈", "Her adımın bir sanat! 🎨",
+    "En tatlı oyuncu! 🍭", "Seninle gurur duyuyorum! 🐣", "Oyunun efendisi! 👑",
+    "Bakış açın harika! 🔭", "Eşi benzeri yok! 🦄", "Çok havalısın abla! 😎",
+    "Bilgi ve beceri bir arada! 📚", "Şans her zaman seninle olsun! 🍀", "Güneş gibi doğdun! ☀️",
+    "Pes etmek sana göre değil! 🛡️", "Adım adım zafere! 👣", "İlham vericisin! 💡",
+    "Pırlanta gibi parlıyorsun! 💍", "Daha iyisi olamazdı! 👌", "Sen bu işi biliyorsun! ✅",
+    "Klasını konuşturuyorsun! 🎩", "Ablam olduğu için çok şanslıyım! 🍀", "Ablaların en iyisi🥰🥰🌈🌈", "Yaşama Sebebim🌈🌈🌷🌷❤️❤️"
 ];
 
 // --- HIZ AYARLARINI GÜNCELLEDİM ---
