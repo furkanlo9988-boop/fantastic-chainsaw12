@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Süper Mora</title>
+    <title>Sıralı İltifatlı Runner</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fdfbfb; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         canvas { display: block; background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%); }
@@ -27,7 +27,7 @@
         }
         .compliment-text {
             position: absolute; white-space: nowrap; left: 100%;
-            font-size: 32px; font-weight: bold; color: #ff4081;
+            font-size: 30px; font-weight: bold; color: #ff4081;
             text-shadow: 2px 2px 8px rgba(255,64,129,0.2);
             font-style: italic;
         }
@@ -45,7 +45,7 @@
 <div id="compliment-container"></div>
 
 <div id="msg" onclick="resetGame()">
-    <div style="font-weight: bold;">Hata yapabilirsin sorun değil, seninle gurur duyuyorum! 🌸</div>
+    <div style="font-weight: bold;">Harikasın abla, tekrar deneyelim! 🌸</div>
     <button class="restart-btn">Tekrar Başla</button>
 </div>
 <canvas id="game"></canvas>
@@ -60,7 +60,10 @@ const compContainer = document.getElementById("compliment-container");
 let w, h, laneW, player, obstacles, score, gameActive, speed;
 let lastMilestone = 0;
 
-// TAM 50 TANE ÖZEL İLTİFAT
+// Sıra sistemi için değişkenler
+let complimentQueue = []; 
+let isComplimentShowing = false;
+
 const compliments = [
     "Mükemmel gidiyorsun abla! ✨", "Ablam bir numara! 💖", "Çok zarif oynuyorsun 🌸",
     "Süpersin abla! 🌟", "Rekor senin olsun! 🏆", "Göz kamaştırıyorsun! 💎",
@@ -97,8 +100,11 @@ function init() {
     gameActive = true;
     msgEl.style.display = "none";
     compContainer.innerHTML = "";
+    complimentQueue = [];
+    isComplimentShowing = false;
 }
 
+// Kontroller
 let touchStartX = 0;
 window.addEventListener("touchstart", e => touchStartX = e.touches[0].clientX);
 window.addEventListener("touchend", e => {
@@ -109,18 +115,31 @@ window.addEventListener("touchend", e => {
     }
 });
 
-function showCompliment() {
+// Sıralı Mesaj Sistemi
+function processQueue() {
+    if (isComplimentShowing || complimentQueue.length === 0 || !gameActive) return;
+
+    isComplimentShowing = true;
+    const text = complimentQueue.shift();
     const textDiv = document.createElement("div");
     textDiv.className = "compliment-text";
-    textDiv.innerText = compliments[Math.floor(Math.random() * compliments.length)];
+    textDiv.innerText = text;
     compContainer.appendChild(textDiv);
+
     let pos = w;
     function animate() {
-        if (!gameActive) { textDiv.remove(); return; }
-        pos -= 1.8; // Mesajın yavaş ve nazik akışı
+        if (!gameActive) { textDiv.remove(); isComplimentShowing = false; return; }
+        pos -= 2.2; // Sabit ve sakin okuma hızı
         textDiv.style.left = pos + "px";
-        if (pos > -900) requestAnimationFrame(animate);
-        else textDiv.remove();
+
+        if (pos > -900) {
+            requestAnimationFrame(animate);
+        } else {
+            textDiv.remove();
+            isComplimentShowing = false;
+            // Bir sonraki mesajı kontrol et
+            setTimeout(processQueue, 500); // Mesajlar arası yarım saniye mola
+        }
     }
     animate();
 }
@@ -147,9 +166,12 @@ function update() {
     let currentScore = Math.floor(score);
     scoreEl.innerText = currentScore;
 
+    // Her 50 puanda listeye (kuyruğa) ekle
     if (currentScore > 0 && currentScore % 50 === 0 && currentScore !== lastMilestone) {
         lastMilestone = currentScore;
-        showCompliment();
+        const randomMsg = compliments[Math.floor(Math.random() * compliments.length)];
+        complimentQueue.push(randomMsg);
+        processQueue(); // Kuyruğu işlemeye çalış
     }
 
     player.targetX = player.lane * laneW + laneW / 2;
