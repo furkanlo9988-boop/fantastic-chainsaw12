@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Göz kamaştırıyorsun</title>
+    <title>Hızlanan Abla Runner</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fdfbfb; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         canvas { display: block; background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%); }
@@ -12,6 +12,12 @@
             position: absolute; top: 40px; left: 0; width: 100%;
             text-align: center; color: #5d67e8; font-size: 24px; font-weight: bold;
             pointer-events: none; z-index: 5;
+        }
+
+        /* Hızın arttığını görmen için geçici gösterge */
+        #speedo {
+            position: absolute; top: 10px; left: 10px; color: rgba(93,103,232,0.5);
+            font-size: 12px; pointer-events: none;
         }
 
         #msg {
@@ -30,23 +36,23 @@
             font-size: 34px; font-weight: bold; color: #ff4081;
             text-shadow: 2px 2px 8px rgba(255,64,129,0.2);
             font-style: italic;
-            transition: none;
         }
 
         .restart-btn {
             margin-top: 25px; padding: 15px 40px; border: none;
             background: #5d67e8; color: white; border-radius: 50px;
-            font-size: 18px; font-weight: bold; cursor: pointer;
+            font-size: 18px; font-weight: bold;
         }
     </style>
 </head>
 <body>
 
+<div id="speedo">Hız: <span id="current-speed">0</span></div>
 <div id="ui">PUAN: <span id="score">0</span></div>
 <div id="compliment-container"></div>
 
 <div id="msg" onclick="resetGame()">
-    <div style="font-weight: bold;">Hata yapabilirsin sorun değil seninle gurur duyuyorum! 🌸</div>
+    <div style="font-weight: bold;">Harika bir denemeydi abla! 🌸</div>
     <button class="restart-btn">Tekrar Başla</button>
 </div>
 <canvas id="game"></canvas>
@@ -55,6 +61,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
+const speedEl = document.getElementById("current-speed");
 const msgEl = document.getElementById("msg");
 const compContainer = document.getElementById("compliment-container");
 
@@ -63,15 +70,13 @@ let lastMilestone = 0;
 
 const compliments = [
     "Mükemmel gidiyorsun abla! ✨", "Ablam bir numara! 💖", "Çok zarif oynuyorsun 🌸",
-    "Süpersin abla! 🌟", "Rekor senin olsun! 🏆", "Göz kamaştırıyorsun! 💎",
-    "Efsanesin sen! 🔥", "Harika bir stil! 💅", "İnanılmaz yetenek! 🎈",
-    "Böyle devam et prenses! 👑", "Dünyanın en iyi oyuncusu! 🌍"
+    "Süpersin abla! 🌟", "Rekor senin olsun! 🏆", "Göz kamaştırıyorsun! 💎"
 ];
 
-// --- HIZ AYARLARI ---
-const initialSpeed = 1.8;   // Çok yavaş başlıyor (Önceki 2.2 idi)
-const acceleration = 0.0008; // Zamanla hızlanma oranı (Daha belirgin hale getirildi)
-const maxSpeed = 7.5;       // Oyunun çıkabileceği maksimum hız
+// --- HIZ AYARLARINI GÜNCELLEDİM ---
+const initialSpeed = 2.0;   
+const acceleration = 0.005; // 0.0008'den 0.005'e çektim (Hızlanma artık hissedilecek)
+const maxSpeed = 12.0;      
 
 function init() {
     w = canvas.width = window.innerWidth;
@@ -81,12 +86,13 @@ function init() {
     obstacles = [];
     score = 0;
     lastMilestone = 0;
-    speed = initialSpeed; // Hız baştan başlıyor
+    speed = initialSpeed; 
     gameActive = true;
     msgEl.style.display = "none";
     compContainer.innerHTML = "";
 }
 
+// Kontroller
 let touchStartX = 0;
 window.addEventListener("touchstart", e => touchStartX = e.touches[0].clientX);
 window.addEventListener("touchend", e => {
@@ -102,31 +108,25 @@ function showCompliment() {
     textDiv.className = "compliment-text";
     textDiv.innerText = compliments[Math.floor(Math.random() * compliments.length)];
     compContainer.appendChild(textDiv);
-
     let pos = w;
     function animate() {
         if (!gameActive) { textDiv.remove(); return; }
-        pos -= 2.5; // İltifat yazısının kayma hızı sabit ve rahat okunur
+        pos -= 3; 
         textDiv.style.left = pos + "px";
-
-        if (pos > -800) {
-            requestAnimationFrame(animate);
-        } else {
-            textDiv.remove();
-        }
+        if (pos > -800) requestAnimationFrame(animate);
+        else textDiv.remove();
     }
     animate();
 }
 
 function spawnObstacle() {
-    // Engel sıklığı hıza göre hafifçe artar
-    let spawnRate = 0.007 + (speed * 0.001); 
-    if (Math.random() < Math.min(spawnRate, 0.02)) {
+    // Engel çıkma olasılığını hıza göre artırıyoruz
+    let spawnChance = 0.008 + (speed * 0.002);
+    if (Math.random() < Math.min(spawnChance, 0.03)) {
         let lane = Math.floor(Math.random() * 3);
         const lastObs = obstacles[obstacles.length - 1];
-        // Engeller arası mesafe hıza göre ayarlanır ki üst üste binmesinler
-        let minGap = 350 + (speed * 20); 
-        if (!lastObs || lastObs.y > minGap / 2) {
+        // Engeller arası güvenli mesafe
+        if (!lastObs || lastObs.y > (300)) {
             obstacles.push({
                 x: lane * laneW + laneW / 2,
                 y: -100, w: laneW * 0.65, h: 40, color: "#9da5ff"
@@ -138,24 +138,25 @@ function spawnObstacle() {
 function update() {
     if (!gameActive) return;
 
-    // Hızlanma Mantığı: Her karede hızı artırıyoruz (Limitli)
+    // HIZLANMA BURADA GERÇEKLEŞİYOR
     if (speed < maxSpeed) {
-        speed += acceleration;
+        speed += acceleration; 
     }
+    
+    // Hız göstergesini güncelle (Test için)
+    speedEl.innerText = speed.toFixed(2);
 
-    // Skor hıza bağlı olarak artar (Hızlandıkça daha çok puan)
-    score += (speed / 50); 
+    score += (speed / 40); 
     let currentScore = Math.floor(score);
     scoreEl.innerText = currentScore;
 
-    // Her 50 puanda bir iltifat
     if (currentScore > 0 && currentScore % 50 === 0 && currentScore !== lastMilestone) {
         lastMilestone = currentScore;
         showCompliment();
     }
 
     player.targetX = player.lane * laneW + laneW / 2;
-    player.x += (player.targetX - player.x) * 0.12;
+    player.x += (player.targetX - player.x) * 0.15;
 
     spawnObstacle();
 
@@ -163,8 +164,6 @@ function update() {
         obs.y += speed;
         let dx = Math.abs(obs.x - player.x);
         let dy = Math.abs((obs.y + obs.h/2) - player.y);
-        
-        // Çarpışma kutusu (Hitbox) abla dostu kalmaya devam ediyor
         if (dx < (obs.w/2 + player.r - 18) && dy < (obs.h/2 + player.r - 18)) {
             gameActive = false;
             msgEl.style.display = "flex";
