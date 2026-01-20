@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Hızlanan Abla Runner</title>
+    <title>Süper Mora</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fdfbfb; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         canvas { display: block; background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%); }
@@ -12,12 +12,6 @@
             position: absolute; top: 40px; left: 0; width: 100%;
             text-align: center; color: #5d67e8; font-size: 24px; font-weight: bold;
             pointer-events: none; z-index: 5;
-        }
-
-        /* Hızın arttığını görmen için geçici gösterge */
-        #speedo {
-            position: absolute; top: 10px; left: 10px; color: rgba(93,103,232,0.5);
-            font-size: 12px; pointer-events: none;
         }
 
         #msg {
@@ -33,7 +27,7 @@
         }
         .compliment-text {
             position: absolute; white-space: nowrap; left: 100%;
-            font-size: 34px; font-weight: bold; color: #ff4081;
+            font-size: 32px; font-weight: bold; color: #ff4081;
             text-shadow: 2px 2px 8px rgba(255,64,129,0.2);
             font-style: italic;
         }
@@ -47,12 +41,11 @@
 </head>
 <body>
 
-<div id="speedo">Hız: <span id="current-speed">0</span></div>
 <div id="ui">PUAN: <span id="score">0</span></div>
 <div id="compliment-container"></div>
 
 <div id="msg" onclick="resetGame()">
-    <div style="font-weight: bold;">Harika bir denemeydi abla! 🌸</div>
+    <div style="font-weight: bold;">Hata yapabilirsin sorun değil, seninle gurur duyuyorum! 🌸</div>
     <button class="restart-btn">Tekrar Başla</button>
 </div>
 <canvas id="game"></canvas>
@@ -61,21 +54,35 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
-const speedEl = document.getElementById("current-speed");
 const msgEl = document.getElementById("msg");
 const compContainer = document.getElementById("compliment-container");
 
 let w, h, laneW, player, obstacles, score, gameActive, speed;
 let lastMilestone = 0;
 
+// TAM 50 TANE ÖZEL İLTİFAT
 const compliments = [
     "Mükemmel gidiyorsun abla! ✨", "Ablam bir numara! 💖", "Çok zarif oynuyorsun 🌸",
-    "Süpersin abla! 🌟", "Rekor senin olsun! 🏆", "Göz kamaştırıyorsun! 💎"
+    "Süpersin abla! 🌟", "Rekor senin olsun! 🏆", "Göz kamaştırıyorsun! 💎",
+    "Efsanesin sen! 🔥", "Harika bir stil! 💅", "İnanılmaz yetenek! 🎈",
+    "Böyle devam et prenses! 👑", "Dünyanın en iyi oyuncusu! 🌍", "Sen bir yıldızsın! ⭐",
+    "Harikasın canım ablam! 🥰", "Gülüşün gibi parlak oynuyorsun! ✨", "Kimse seni geçemez! 🚀",
+    "Zekice hamleler! 🧠", "Işığın her yeri aydınlatıyor! 💡", "Ablaların en güzeli! 🌷",
+    "Seninle oynamak bir şeref! 🎖️", "Hızına yetişilemiyor! ⚡", "Muhteşem bir odaklanma! 🎯",
+    "Kalbinin güzelliği oyuna yansıyor! ❤️", "Oyunun kraliçesi! 👸", "Durdurulamaz bir güç! 💪",
+    "Zarafetinle büyülüyorsun! ✨", "Bravo abla, süper! 👏", "En yüksek puan sana yakışır! 🏅",
+    "Sihirli parmaklar! 🪄", "Geleceğin şampiyonu! 🏁", "Senin enerjin yeter! 🔋",
+    "Sakin ve kararlı! 🌊", "Gökkuşağı gibi renklisin! 🌈", "Her adımın bir sanat! 🎨",
+    "En tatlı oyuncu! 🍭", "Seninle gurur duyuyorum! 🐣", "Oyunun efendisi! 👑",
+    "Bakış açın harika! 🔭", "Eşi benzeri yok! 🦄", "Çok havalısın abla! 😎",
+    "Bilgi ve beceri bir arada! 📚", "Şans her zaman seninle olsun! 🍀", "Güneş gibi doğdun! ☀️",
+    "Pes etmek sana göre değil! 🛡️", "Adım adım zafere! 👣", "İlham vericisin! 💡",
+    "Pırlanta gibi parlıyorsun! 💍", "Daha iyisi olamazdı! 👌", "Sen bu işi biliyorsun! ✅",
+    "Klasını konuşturuyorsun! 🎩", "Ablam olduğu için çok şanslıyım! 🍀"
 ];
 
-// --- HIZ AYARLARINI GÜNCELLEDİM ---
 const initialSpeed = 2.0;   
-const acceleration = 0.005; // 0.0008'den 0.005'e çektim (Hızlanma artık hissedilecek)
+const acceleration = 0.005; 
 const maxSpeed = 12.0;      
 
 function init() {
@@ -92,7 +99,6 @@ function init() {
     compContainer.innerHTML = "";
 }
 
-// Kontroller
 let touchStartX = 0;
 window.addEventListener("touchstart", e => touchStartX = e.touches[0].clientX);
 window.addEventListener("touchend", e => {
@@ -111,22 +117,20 @@ function showCompliment() {
     let pos = w;
     function animate() {
         if (!gameActive) { textDiv.remove(); return; }
-        pos -= 3; 
+        pos -= 1.8; // Mesajın yavaş ve nazik akışı
         textDiv.style.left = pos + "px";
-        if (pos > -800) requestAnimationFrame(animate);
+        if (pos > -900) requestAnimationFrame(animate);
         else textDiv.remove();
     }
     animate();
 }
 
 function spawnObstacle() {
-    // Engel çıkma olasılığını hıza göre artırıyoruz
     let spawnChance = 0.008 + (speed * 0.002);
     if (Math.random() < Math.min(spawnChance, 0.03)) {
         let lane = Math.floor(Math.random() * 3);
         const lastObs = obstacles[obstacles.length - 1];
-        // Engeller arası güvenli mesafe
-        if (!lastObs || lastObs.y > (300)) {
+        if (!lastObs || lastObs.y > 350) {
             obstacles.push({
                 x: lane * laneW + laneW / 2,
                 y: -100, w: laneW * 0.65, h: 40, color: "#9da5ff"
@@ -137,14 +141,7 @@ function spawnObstacle() {
 
 function update() {
     if (!gameActive) return;
-
-    // HIZLANMA BURADA GERÇEKLEŞİYOR
-    if (speed < maxSpeed) {
-        speed += acceleration; 
-    }
-    
-    // Hız göstergesini güncelle (Test için)
-    speedEl.innerText = speed.toFixed(2);
+    if (speed < maxSpeed) speed += acceleration; 
 
     score += (speed / 40); 
     let currentScore = Math.floor(score);
