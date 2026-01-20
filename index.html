@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sıralı İltifatlı Runner</title>
+    <title>Ablama Özel Kesintisiz Runner</title>
     <style>
         body { margin: 0; overflow: hidden; background: #fdfbfb; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         canvas { display: block; background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%); }
@@ -22,12 +22,12 @@
         }
 
         #compliment-container {
-            position: absolute; top: 40%; width: 100%; height: 80px;
+            position: absolute; top: 35%; width: 100%; height: 100px;
             overflow: hidden; pointer-events: none; z-index: 8;
         }
         .compliment-text {
             position: absolute; white-space: nowrap; left: 100%;
-            font-size: 30px; font-weight: bold; color: #ff4081;
+            font-size: 32px; font-weight: bold; color: #ff4081;
             text-shadow: 2px 2px 8px rgba(255,64,129,0.2);
             font-style: italic;
         }
@@ -59,9 +59,7 @@ const compContainer = document.getElementById("compliment-container");
 
 let w, h, laneW, player, obstacles, score, gameActive, speed;
 let lastMilestone = 0;
-
-// Sıra sistemi için değişkenler
-let complimentQueue = []; 
+let complimentQueue = [];
 let isComplimentShowing = false;
 
 const compliments = [
@@ -84,6 +82,7 @@ const compliments = [
     "Klasını konuşturuyorsun! 🎩", "Ablam olduğu için çok şanslıyım! 🍀"
 ];
 
+// Ayarlar
 const initialSpeed = 2.0;   
 const acceleration = 0.005; 
 const maxSpeed = 12.0;      
@@ -104,8 +103,6 @@ function init() {
     isComplimentShowing = false;
 }
 
-// Kontroller
-let touchStartX = 0;
 window.addEventListener("touchstart", e => touchStartX = e.touches[0].clientX);
 window.addEventListener("touchend", e => {
     let diff = e.changedTouches[0].clientX - touchStartX;
@@ -115,9 +112,14 @@ window.addEventListener("touchend", e => {
     }
 });
 
-// Sıralı Mesaj Sistemi
 function processQueue() {
-    if (isComplimentShowing || complimentQueue.length === 0 || !gameActive) return;
+    // Eğer ekranda yazı varsa veya oyun bitmişse çık
+    if (isComplimentShowing || !gameActive || complimentQueue.length === 0) return;
+
+    // Kuyruk çok şişmişse (5'ten fazla mesaj birikmişse) sadece en sonuncuyu göster
+    if (complimentQueue.length > 5) {
+        complimentQueue = [complimentQueue[complimentQueue.length - 1]];
+    }
 
     isComplimentShowing = true;
     const text = complimentQueue.shift();
@@ -129,16 +131,19 @@ function processQueue() {
     let pos = w;
     function animate() {
         if (!gameActive) { textDiv.remove(); isComplimentShowing = false; return; }
-        pos -= 2.2; // Sabit ve sakin okuma hızı
+        
+        // ÖNEMLİ: Yazı hızı oyun hızına göre ölçeklenir, böylece yığılma olmaz
+        let textSpeed = 2 + (speed * 0.5); 
+        pos -= textSpeed;
         textDiv.style.left = pos + "px";
 
-        if (pos > -900) {
+        if (pos > -1000) {
             requestAnimationFrame(animate);
         } else {
             textDiv.remove();
             isComplimentShowing = false;
-            // Bir sonraki mesajı kontrol et
-            setTimeout(processQueue, 500); // Mesajlar arası yarım saniye mola
+            // Sıradaki mesajı hemen kontrol et ama çok kısa bir es ver
+            setTimeout(processQueue, 100); 
         }
     }
     animate();
@@ -166,12 +171,11 @@ function update() {
     let currentScore = Math.floor(score);
     scoreEl.innerText = currentScore;
 
-    // Her 50 puanda listeye (kuyruğa) ekle
+    // Her 50 puan
     if (currentScore > 0 && currentScore % 50 === 0 && currentScore !== lastMilestone) {
         lastMilestone = currentScore;
-        const randomMsg = compliments[Math.floor(Math.random() * compliments.length)];
-        complimentQueue.push(randomMsg);
-        processQueue(); // Kuyruğu işlemeye çalış
+        complimentQueue.push(compliments[Math.floor(Math.random() * compliments.length)]);
+        processQueue();
     }
 
     player.targetX = player.lane * laneW + laneW / 2;
@@ -186,6 +190,7 @@ function update() {
         if (dx < (obs.w/2 + player.r - 18) && dy < (obs.h/2 + player.r - 18)) {
             gameActive = false;
             msgEl.style.display = "flex";
+            compContainer.innerHTML = ""; // Yandığı an yazıları temizle
         }
         if (obs.y > h) obstacles.splice(index, 1);
     });
