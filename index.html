@@ -18,7 +18,7 @@
             position: absolute; inset: 0; display: none;
             background: rgba(255,255,255,0.92); color: #5d67e8;
             align-items: center; justify-content: center; font-size: 26px;
-            flex-direction: column; text-align: center; z-index: 10;
+            flex-direction: column; text-align: center; z-index: 10; padding: 20px;
         }
 
         #compliment-container {
@@ -36,7 +36,7 @@
         .restart-btn {
             margin-top: 25px; padding: 15px 40px; border: none;
             background: #5d67e8; color: white; border-radius: 50px;
-            font-size: 18px; font-weight: bold;
+            font-size: 18px; font-weight: bold; cursor: pointer;
         }
     </style>
 </head>
@@ -46,7 +46,7 @@
 <div id="compliment-container"></div>
 
 <div id="msg" onclick="resetGame()">
-    <div style="font-weight: bold;">Hata yapabilirsin sorun değil seninle gurur duyuyorm! 🌸</div>
+    <div style="font-weight: bold;">Hata yapabilirsin sorun değil seninle gurur duyuyorum! 🌸</div>
     <button class="restart-btn">Tekrar Başla</button>
 </div>
 <canvas id="game"></canvas>
@@ -68,8 +68,10 @@ const compliments = [
     "Böyle devam et prenses! 👑", "Dünyanın en iyi oyuncusu! 🌍"
 ];
 
-const initialSpeed = 2.2;
-const acceleration = 0.0001;
+// --- HIZ AYARLARI ---
+const initialSpeed = 1.8;   // Çok yavaş başlıyor (Önceki 2.2 idi)
+const acceleration = 0.0008; // Zamanla hızlanma oranı (Daha belirgin hale getirildi)
+const maxSpeed = 7.5;       // Oyunun çıkabileceği maksimum hız
 
 function init() {
     w = canvas.width = window.innerWidth;
@@ -79,7 +81,7 @@ function init() {
     obstacles = [];
     score = 0;
     lastMilestone = 0;
-    speed = initialSpeed;
+    speed = initialSpeed; // Hız baştan başlıyor
     gameActive = true;
     msgEl.style.display = "none";
     compContainer.innerHTML = "";
@@ -104,7 +106,7 @@ function showCompliment() {
     let pos = w;
     function animate() {
         if (!gameActive) { textDiv.remove(); return; }
-        pos -= 1.8; // HIZI DÜŞÜRDÜM: Mesajlar artık çok daha yavaş akıyor
+        pos -= 2.5; // İltifat yazısının kayma hızı sabit ve rahat okunur
         textDiv.style.left = pos + "px";
 
         if (pos > -800) {
@@ -117,10 +119,14 @@ function showCompliment() {
 }
 
 function spawnObstacle() {
-    if (Math.random() < 0.0075) {
+    // Engel sıklığı hıza göre hafifçe artar
+    let spawnRate = 0.007 + (speed * 0.001); 
+    if (Math.random() < Math.min(spawnRate, 0.02)) {
         let lane = Math.floor(Math.random() * 3);
         const lastObs = obstacles[obstacles.length - 1];
-        if (!lastObs || lastObs.y > 450) {
+        // Engeller arası mesafe hıza göre ayarlanır ki üst üste binmesinler
+        let minGap = 350 + (speed * 20); 
+        if (!lastObs || lastObs.y > minGap / 2) {
             obstacles.push({
                 x: lane * laneW + laneW / 2,
                 y: -100, w: laneW * 0.65, h: 40, color: "#9da5ff"
@@ -131,12 +137,18 @@ function spawnObstacle() {
 
 function update() {
     if (!gameActive) return;
-    speed += acceleration;
-    score += 0.05;
+
+    // Hızlanma Mantığı: Her karede hızı artırıyoruz (Limitli)
+    if (speed < maxSpeed) {
+        speed += acceleration;
+    }
+
+    // Skor hıza bağlı olarak artar (Hızlandıkça daha çok puan)
+    score += (speed / 50); 
     let currentScore = Math.floor(score);
     scoreEl.innerText = currentScore;
 
-    // ARTIK HER 50 PUANDA BİR TETİKLENİYOR
+    // Her 50 puanda bir iltifat
     if (currentScore > 0 && currentScore % 50 === 0 && currentScore !== lastMilestone) {
         lastMilestone = currentScore;
         showCompliment();
@@ -151,6 +163,8 @@ function update() {
         obs.y += speed;
         let dx = Math.abs(obs.x - player.x);
         let dy = Math.abs((obs.y + obs.h/2) - player.y);
+        
+        // Çarpışma kutusu (Hitbox) abla dostu kalmaya devam ediyor
         if (dx < (obs.w/2 + player.r - 18) && dy < (obs.h/2 + player.r - 18)) {
             gameActive = false;
             msgEl.style.display = "flex";
