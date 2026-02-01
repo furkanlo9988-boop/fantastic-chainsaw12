@@ -2,218 +2,200 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Super Nola</title>
+    <title>Canım Ablam, Her Şeyim...</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #fdfbfb; font-family: 'Segoe UI', sans-serif; touch-action: none; }
-        canvas { display: block; background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%); }
-
-        #ui {
-            position: absolute; top: 40px; left: 0; width: 100%;
-            text-align: center; color: #5d67e8; font-size: 24px; font-weight: bold;
-            pointer-events: none; z-index: 5;
+        :root {
+            --deep-rose: #880e4f;
+            --soft-pink: #fce4ec;
+            --gold: #b8860b;
         }
 
-        /* Hızın arttığını görmen için geçici gösterge */
-        #speedo {
-            position: absolute; top: 10px; left: 10px; color: rgba(93,103,232,0.5);
-            font-size: 12px; pointer-events: none;
+        body {
+            margin: 0; overflow: hidden;
+            background: radial-gradient(circle, #fff5f8 0%, #f8bbd0 100%);
+            font-family: 'Georgia', serif;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        #msg {
-            position: absolute; inset: 0; display: none;
-            background: rgba(255,255,255,0.92); color: #5d67e8;
-            align-items: center; justify-content: center; font-size: 26px;
-            flex-direction: column; text-align: center; z-index: 10; padding: 20px;
+        #header { 
+            text-align: center; padding: 25px; color: var(--deep-rose); 
+            z-index: 10; font-style: italic;
+        }
+        
+        #game-area { position: relative; width: 100vw; height: 70vh; }
+
+        #target {
+            position: absolute; width: 90px; height: 90px;
+            background: white; border: 3px solid var(--deep-rose);
+            border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; font-size: 45px; cursor: pointer;
+            box-shadow: 0 10px 30px rgba(136, 14, 79, 0.2);
+            transition: all 0.1s ease-out; z-index: 20;
         }
 
-        #compliment-container {
-            position: absolute; top: 40%; width: 100%; height: 80px;
-            overflow: hidden; pointer-events: none; z-index: 8;
-        }
-        .compliment-text {
-            position: absolute; white-space: nowrap; left: 100%;
-            font-size: 34px; font-weight: bold; color: #ff4081;
-            text-shadow: 2px 2px 8px rgba(255,64,129,0.2);
-            font-style: italic;
+        /* Mektup Overlay */
+        #letter-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(40, 0, 15, 0.85);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
         }
 
-        .restart-btn {
-            margin-top: 25px; padding: 15px 40px; border: none;
-            background: #5d67e8; color: white; border-radius: 50px;
-            font-size: 18px; font-weight: bold;
+        #letter-box {
+            position: absolute; right: -150%; width: 450px;
+            background: #fffef2; padding: 50px;
+            box-shadow: -20px 20px 50px rgba(0,0,0,0.5);
+            border-left: 12px solid var(--gold);
+            transform: rotate(-1deg);
+            transition: right 1.8s cubic-bezier(0.19, 1, 0.22, 1);
         }
+
+        #letter-box h2 { color: var(--deep-rose); margin-top: 0; font-size: 28px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        #letter-box p { font-size: 20px; line-height: 1.8; color: #222; font-style: italic; white-space: pre-line; }
+
+        #close-btn { 
+            margin-top: 30px; padding: 15px 30px; 
+            background: var(--deep-rose); color: white; border: none; 
+            border-radius: 4px; cursor: pointer; font-size: 16px; letter-spacing: 1px;
+        }
+
+        #compliment-banner {
+            position: fixed; bottom: 40px; font-size: 26px;
+            color: var(--deep-rose); text-align: center;
+            width: 80%; font-style: italic; font-weight: bold;
+            text-shadow: 1px 1px 1px white;
+            animation: fadeEffect 1s;
+        }
+
+        @keyframes fadeEffect { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div id="speedo">Hız: <span id="current-speed">0</span></div>
-<div id="ui">PUAN: <span id="score">0</span></div>
-<div id="compliment-container"></div>
-
-<div id="msg" onclick="resetGame()">
-    <div style="font-weight: bold;">Hata yapabilirsin sorun değil tekrar dene! 🌸</div>
-    <button class="restart-btn">Tekrar Başla</button>
+<div id="header">
+    <h1>✨ Kalbimdeki En Özel Yere Yolculuk ✨</h1>
+    <div style="font-size: 24px;">Sevgi Puanın: <span id="score">0</span></div>
 </div>
-<canvas id="game"></canvas>
+
+<div id="game-area">
+    <div id="target">❤️</div>
+</div>
+
+<div id="compliment-banner">Seni ne kadar çok sevdiğimi görmek için başla ablacığım...</div>
+
+<div id="letter-overlay">
+    <div id="letter-box">
+        <h2 id="m-title"></h2>
+        <p id="m-text"></p>
+        <button id="close-btn" onclick="closeLetter()">Yolculuğa Devam Et 🏹</button>
+    </div>
+</div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const scoreEl = document.getElementById("score");
-const speedEl = document.getElementById("current-speed");
-const msgEl = document.getElementById("msg");
-const compContainer = document.getElementById("compliment-container");
-
-let w, h, laneW, player, obstacles, score, gameActive, speed;
-let lastMilestone = 0;
-
-const compliments = [
-   "Mükemmel gidiyorsun abla! ✨", "Ablam bir numara! 💖", "Çok zarif oynuyorsun🌷",
-    "Süpersin abla! 🌟", "Rekor senin olsun! 🏆", "Göz kamaştırıyorsun! 💎",
-    "Efsanesin sen! 🔥", "Harika bir stil! 💅", "İnanılmaz yetenek! 🎈",
-    "Böyle devam et prenses! 👑", "Dünyanın en iyi oyuncusu! 🌍", "Sen bir yıldızsın! ⭐",
-    "Harikasın canım ablam! 🥰", "Gülüşün gibi parlak oynuyorsun! ✨", "Kimse seni geçemez! 🚀",
-    "Zekice hamleler! 🧠", "Işığın her yeri aydınlatıyor! 💡", "Ablaların en güzeli! 🌷",
-    "Seninle oynamak bir şeref! 🎖️", "Hızına yetişilemiyor! ⚡", "Muhteşem bir odaklanma! 🎯",
-    "Kalbinin güzelliği oyuna yansıyor! ❤️", "Oyunun kraliçesi! 👸", "Durdurulamaz bir güç! 💪",
-    "Zarafetinle büyülüyorsun! ✨", "Bravo abla, süper! 👏", "En yüksek puan sana yakışır! 🏅",
-    "Sihirli parmaklar! 🪄", "Geleceğin şampiyonu! 🏁", "Senin enerjin yeter! 🔋",
-    "Sakin ve kararlı! 🌊", "Gökkuşağı gibi renklisin! 🌈", "Her adımın bir sanat! 🎨",
-    "En tatlı oyuncu! 🍭", "Seninle gurur duyuyorum! 🐣", "Oyunun efendisi! 👑",
-    "Bakış açın harika! 🔭", "Eşi benzeri yok! 🦄", "Çok havalısın abla! 😎",
-    "Bilgi ve beceri bir arada! 📚", "Şans her zaman seninle olsun! 🍀", "Güneş gibi doğdun! ☀️",
-    "Pes etmek sana göre değil! 🛡️", "Adım adım zafere! 👣", "İlham vericisin! 💡",
-    "Pırlanta gibi parlıyorsun! 💍", "Daha iyisi olamazdı! 👌", "Sen bu işi biliyorsun! ✅",
-    "Klasını konuşturuyorsun! 🎩", "Ablam olduğu için çok şanslıyım! 🍀", "Ablaların en iyisi🥰🥰🌈🌈", "Yaşama Sebebim🌈🌈🌷🌷❤️❤️"
-];
-
-// --- HIZ AYARLARINI GÜNCELLEDİM ---
-const initialSpeed = 2.0;   
-const acceleration = 0.005; // 0.0008'den 0.005'e çektim (Hızlanma artık hissedilecek)
-const maxSpeed = 12.0;      
-
-function init() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-    laneW = w / 3;
-    player = { lane: 1, targetX: laneW + laneW/2, x: laneW + laneW/2, y: h - 160, r: 22 };
-    obstacles = [];
-    score = 0;
-    lastMilestone = 0;
-    speed = initialSpeed; 
-    gameActive = true;
-    msgEl.style.display = "none";
-    compContainer.innerHTML = "";
-}
-
-// Kontroller
-let touchStartX = 0;
-window.addEventListener("touchstart", e => touchStartX = e.touches[0].clientX);
-window.addEventListener("touchend", e => {
-    let diff = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(diff) > 25) {
-        if (diff > 0 && player.lane < 2) player.lane++;
-        else if (diff < 0 && player.lane > 0) player.lane--;
-    }
-});
-
-function showCompliment() {
-    const textDiv = document.createElement("div");
-    textDiv.className = "compliment-text";
-    textDiv.innerText = compliments[Math.floor(Math.random() * compliments.length)];
-    compContainer.appendChild(textDiv);
-    let pos = w;
-    function animate() {
-        if (!gameActive) { textDiv.remove(); return; }
-        pos -= 3; 
-        textDiv.style.left = pos + "px";
-        if (pos > -800) requestAnimationFrame(animate);
-        else textDiv.remove();
-    }
-    animate();
-}
-
-function spawnObstacle() {
-    // Engel çıkma olasılığını hıza göre artırıyoruz
-    let spawnChance = 0.008 + (speed * 0.002);
-    if (Math.random() < Math.min(spawnChance, 0.03)) {
-        let lane = Math.floor(Math.random() * 3);
-        const lastObs = obstacles[obstacles.length - 1];
-        // Engeller arası güvenli mesafe
-        if (!lastObs || lastObs.y > (300)) {
-            obstacles.push({
-                x: lane * laneW + laneW / 2,
-                y: -100, w: laneW * 0.65, h: 40, color: "#9da5ff"
-            });
-        }
-    }
-}
-
-function update() {
-    if (!gameActive) return;
-
-    // HIZLANMA BURADA GERÇEKLEŞİYOR
-    if (speed < maxSpeed) {
-        speed += acceleration; 
-    }
+    const target = document.getElementById('target');
+    const scoreText = document.getElementById('score');
+    const complimentBanner = document.getElementById('compliment-banner');
+    const overlay = document.getElementById('letter-overlay');
+    const letterBox = document.getElementById('letter-box');
     
-    // Hız göstergesini güncelle (Test için)
-    speedEl.innerText = speed.toFixed(2);
+    let score = 0;
 
-    score += (speed / 40); 
-    let currentScore = Math.floor(score);
-    scoreEl.innerText = currentScore;
+    const compliments = [
+        "Sen benim bu hayattaki en güvenli limanımsın... ✨",
+        "Küçüklüğümden beri kahramanım hep sendin abla. ❤️",
+        "Sadece sesini duymak bile içimi huzurla kaplıyor. 🕊️",
+        "Senin gibi yüreği güzel bir insanı tanımak ne büyük şans... 💎",
+        "Yüzündeki tek bir gülümseme için dünyaları veririm. 😊",
+        "Merhametin ve sevginle dünyayı güzelleştiriyorsun. 🌸",
+        "Zorlandığımda elimi tutan ilk el hep senin elindi. 🤝",
+        "Senin sabrın ve bilgeliğin bana her zaman ışık tutuyor. 💡",
+        "Dünya bir yana, senin tek bir damla gözyaşın bir yana... 🌹",
+        "İyi ki aynı ağacın dallarıyız, iyi ki benim ablamsın. 🌳",
+        "Seninle sessizce oturmak bile en güzel terapi. ☕",
+        "Başarılarını izlerken göğsüm gururla kabarıyor. 🏆",
+        "Kalbimin en derin yerinde senin yerin bambaşka... ❤️",
+        "Sen benim çocukluğumun en güzel hatırasısın. 📸"
+    ];
 
-    if (currentScore > 0 && currentScore % 50 === 0 && currentScore !== lastMilestone) {
-        lastMilestone = currentScore;
-        showCompliment();
-    }
-
-    player.targetX = player.lane * laneW + laneW / 2;
-    player.x += (player.targetX - player.x) * 0.15;
-
-    spawnObstacle();
-
-    obstacles.forEach((obs, index) => {
-        obs.y += speed;
-        let dx = Math.abs(obs.x - player.x);
-        let dy = Math.abs((obs.y + obs.h/2) - player.y);
-        if (dx < (obs.w/2 + player.r - 18) && dy < (obs.h/2 + player.r - 18)) {
-            gameActive = false;
-            msgEl.style.display = "flex";
+    const messages = {
+        25: {
+            title: "İlk Adım: Sorumluluğun...",
+            text: "Biliyorum, bazen kardeşin olmak zordu ama sen her zaman en büyük sabırla ve sevgiyle yaklaştın bana. 25 puan senin o sonsuz sabrın için..."
+        },
+        50: {
+            title: "Yolun Yarısı: Koruyuculuğun...",
+            text: "Düştüğümde beni kaldıran, kimse anlamadığında beni sadece gözlerimden anlayan sensin. 50 puan, senin o koruyucu kanatların için..."
+        },
+        75: {
+            title: "Son Durak Öncesi: Dostluğun...",
+            text: "Sen sadece ablam değil, kimseye anlatamadığım sırlarımı emanet ettiğim tek dostumsun. Senin varlığın benim en büyük hazinem."
+        },
+        100: {
+            title: "Canım Ablama... 🌸",
+            text: "Seninle geçen her gün benim için çok değerli. Sadece bir abla değil, aynı zamanda en iyi dostsun. Bu küçük oyunu senin ne kadar harika olduğunu hatırlatmak için yaptım.\n\nSeni Çok Seviyorum, İyi Ki Varsın!\n\n— Kardeşin ❤️"
         }
-        if (obs.y > h) obstacles.splice(index, 1);
-    });
-}
+    };
 
-function draw() {
-    ctx.clearRect(0,0,w,h);
-    ctx.strokeStyle = "rgba(93,103,232,0.1)";
-    ctx.lineWidth = 4;
-    for (let i = 1; i < 3; i++) {
-        ctx.beginPath(); ctx.moveTo(i * laneW, 0); ctx.lineTo(i * laneW, h); ctx.stroke();
+    function moveTarget() {
+        const area = document.getElementById('game-area');
+        const x = Math.random() * (area.clientWidth - 120);
+        const y = Math.random() * (area.clientHeight - 120);
+        target.style.left = x + 'px';
+        target.style.top = y + 'px';
+        
+        if(score > 80) target.style.transform = "scale(0.8)";
     }
-    obstacles.forEach(obs => {
-        ctx.fillStyle = obs.color;
-        ctx.beginPath();
-        if(ctx.roundRect) ctx.roundRect(obs.x - obs.w / 2, obs.y, obs.w, obs.h, [12]);
-        else ctx.fillRect(obs.x - obs.w / 2, obs.y, obs.w, obs.h);
-        ctx.fill();
+
+    target.addEventListener('click', () => {
+        score++;
+        scoreText.innerText = score;
+        
+        if (messages[score]) {
+            if(score === 100) {
+                fireConfetti();
+                document.getElementById('close-btn').innerText = "Seni Çok Seviyorum! ❤️";
+            }
+            showLetter(messages[score].title, messages[score].text);
+        } else {
+            complimentBanner.style.animation = 'none';
+            void complimentBanner.offsetWidth; // Animasyonu sıfırla
+            complimentBanner.style.animation = 'fadeEffect 1s';
+            complimentBanner.innerText = compliments[Math.floor(Math.random() * compliments.length)];
+            moveTarget();
+        }
     });
-    ctx.shadowBlur = 20; ctx.shadowColor = "rgba(93,103,232,0.5)";
-    ctx.fillStyle = "#5d67e8"; ctx.beginPath();
-    ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = "white"; ctx.lineWidth = 5; ctx.stroke();
-    ctx.shadowBlur = 0;
-}
 
-function resetGame() { init(); }
-function loop() { update(); draw(); requestAnimationFrame(loop); }
+    function fireConfetti() {
+        var duration = 5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
 
-init();
-loop();
-window.addEventListener("resize", init);
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            var particleCount = 50 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
+
+    function showLetter(title, text) {
+        document.getElementById('m-title').innerText = title;
+        document.getElementById('m-text').innerText = text;
+        overlay.style.display = 'flex';
+        setTimeout(() => { letterBox.style.right = '15%'; }, 100);
+    }
+
+    function closeLetter() {
+        letterBox.style.right = '-150%';
+        setTimeout(() => { 
+            overlay.style.display = 'none'; 
+            if(score < 100) moveTarget();
+        }, 800);
+    }
+
+    moveTarget();
 </script>
+
 </body>
 </html>
