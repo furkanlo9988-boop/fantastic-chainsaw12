@@ -2,11 +2,16 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Canım Ablama Sürpriz</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
         body {
             background: linear-gradient(135deg, #fff5f5 0%, #fed7e2 100%);
@@ -16,35 +21,30 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            padding: 20px;
         }
 
         /* Giriş Paneli */
         #auth-ui {
             text-align: center;
             background: white;
-            padding: 40px;
-            border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(255, 105, 180, 0.2);
-            transition: 0.5s;
+            padding: 30px 20px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(255, 105, 180, 0.2);
+            width: 100%;
             max-width: 350px;
-            width: 90%;
             position: relative;
         }
 
-        /* Hata durumunda sallanma animasyonu */
-        .shake {
-            animation: shake 0.5s;
-        }
-
+        .shake { animation: shake 0.5s; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
         }
 
         .envelope-icon {
-            font-size: 80px;
+            font-size: 60px;
             margin-bottom: 10px;
             display: inline-block;
             animation: bounce 2s infinite;
@@ -52,61 +52,80 @@
 
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-20px);}
-            60% {transform: translateY(-10px);}
+            40% {transform: translateY(-15px);}
+            60% {transform: translateY(-8px);}
         }
 
+        h3 { color: #d53f8c; font-size: 1.2rem; margin-bottom: 15px; }
+
         input {
-            padding: 12px;
-            width: 80%;
+            padding: 14px;
+            width: 100%;
             border: 2px solid #fbb6ce;
-            border-radius: 15px;
+            border-radius: 12px;
             outline: none;
-            font-size: 1rem;
+            font-size: 16px; /* Mobil tarayıcı zoom yapmasın diye 16px */
             text-align: center;
         }
 
         button {
-            padding: 12px 30px;
+            padding: 14px 25px;
             background: #d53f8c;
             color: white;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 15px;
             font-weight: bold;
-            transition: 0.3s;
+            width: 100%;
+            font-size: 1rem;
         }
 
         #error-msg {
             color: #e53e3e;
-            font-size: 0.85rem;
-            margin-top: 10px;
-            height: 20px; /* Yer tutması için */
+            font-size: 0.8rem;
+            margin-top: 8px;
             opacity: 0;
             transition: 0.3s;
         }
 
-        /* Mesaj İçeriği */
+        /* Mesaj İçeriği (Mobil Scroll Desteği) */
         #secret-content {
             display: none;
             background: #ffffff;
-            width: 90%;
-            max-width: 550px;
-            padding: 50px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px 20px;
             border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
-            background-image: radial-gradient(#fed7e2 1px, transparent 1px);
-            background-size: 20px 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background-image: radial-gradient(#fed7e2 0.5px, transparent 0.5px);
+            background-size: 15px 15px;
             border: 2px solid #fbb6ce;
-            animation: fadeIn 1s;
+            max-height: 90vh; /* Ekrandan taşmaması için */
+            overflow-y: auto; /* İçerik uzunsa kaydırılabilir */
+            animation: fadeIn 0.8s;
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { font-family: 'Dancing Script', cursive; color: #b83280; font-size: 2.5rem; text-align: center; }
-        .long-message { color: #4a5568; line-height: 1.8; white-space: pre-line; border-top: 1px solid #fed7e2; padding-top: 20px; }
-        .signature { font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: #d53f8c; text-align: right; margin-top: 30px; }
+        h2 { font-family: 'Dancing Script', cursive; color: #b83280; font-size: 2rem; text-align: center; margin-bottom: 15px; }
+        
+        .long-message { 
+            color: #4a5568; 
+            line-height: 1.6; 
+            font-size: 1rem;
+            white-space: pre-line; 
+            border-top: 1px solid #fed7e2; 
+            padding-top: 15px;
+        }
+        
+        .signature { 
+            font-family: 'Dancing Script', cursive; 
+            font-size: 1.5rem; 
+            color: #d53f8c; 
+            text-align: right; 
+            margin-top: 20px; 
+        }
     </style>
 </head>
 <body>
@@ -114,7 +133,7 @@
     <div id="auth-ui">
         <div class="envelope-icon">✉️</div>
         <h3>Canım Ablama...</h3>
-        <p style="color: #718096; font-size: 0.9rem;">Mektubu açmak için şifreyi gir:</p>
+        <p style="color: #718096; font-size: 0.85rem;">Mektubu açmak için şifreyi gir:</p>
         <input type="text" id="password" placeholder="Şifre nedir?">
         <div id="error-msg">Ablam olduğuna emin misin? 😊</div>
         <button onclick="checkPassword()">Mektubu Oku ❤️</button>
@@ -140,17 +159,14 @@
             const errorMsg = document.getElementById('error-msg');
             const authUi = document.getElementById('auth-ui');
             
-            // Şifre Kontrolü
             if (passInput.value.toLowerCase() === "ponçik") {
                 authUi.style.display = 'none';
-                document.getElementById('secret-content').style.display = 'block';
+                const secret = document.getElementById('secret-content');
+                secret.style.display = 'block';
                 fireworks();
             } else {
-                // Hata durumu: Sallanma ve nazik mesaj
                 authUi.classList.add('shake');
                 errorMsg.style.opacity = '1';
-                
-                // Animasyonu tekrar edebilmesi için sınıfa süre sonunda kaldırıyoruz
                 setTimeout(() => {
                     authUi.classList.remove('shake');
                 }, 500);
@@ -158,22 +174,22 @@
         }
 
         function fireworks() {
-            var duration = 8 * 1000;
+            var duration = 5 * 1000;
             var end = Date.now() + duration;
 
             (function frame() {
                 confetti({
-                    particleCount: 3,
+                    particleCount: 2,
                     angle: 60,
                     spread: 55,
-                    origin: { x: 0 },
+                    origin: { x: 0, y: 0.8 },
                     colors: ['#ff4d6d', '#ffffff']
                 });
                 confetti({
-                    particleCount: 3,
+                    particleCount: 2,
                     angle: 120,
                     spread: 55,
-                    origin: { x: 1 },
+                    origin: { x: 1, y: 0.8 },
                     colors: ['#ff4d6d', '#ffffff']
                 });
 
@@ -185,4 +201,3 @@
     </script>
 </body>
 </html>
-
