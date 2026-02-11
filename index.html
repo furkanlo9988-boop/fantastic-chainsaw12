@@ -2,200 +2,186 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Canım Ablam, Her Şeyim...</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canım Ablama Sürpriz</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root {
-            --deep-rose: #880e4f;
-            --soft-pink: #fce4ec;
-            --gold: #b8860b;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap');
 
         body {
-            margin: 0; overflow: hidden;
-            background: radial-gradient(circle, #fff5f8 0%, #f8bbd0 100%);
-            font-family: 'Georgia', serif;
-            display: flex; flex-direction: column; align-items: center;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7e2 100%);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
 
-        #header { 
-            text-align: center; padding: 25px; color: var(--deep-rose); 
-            z-index: 10; font-style: italic;
-        }
-        
-        #game-area { position: relative; width: 100vw; height: 70vh; }
-
-        #target {
-            position: absolute; width: 90px; height: 90px;
-            background: white; border: 3px solid var(--deep-rose);
-            border-radius: 50%; display: flex; justify-content: center;
-            align-items: center; font-size: 45px; cursor: pointer;
-            box-shadow: 0 10px 30px rgba(136, 14, 79, 0.2);
-            transition: all 0.1s ease-out; z-index: 20;
+        /* Giriş Paneli */
+        #auth-ui {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(255, 105, 180, 0.2);
+            transition: 0.5s;
+            max-width: 350px;
+            width: 90%;
+            position: relative;
         }
 
-        /* Mektup Overlay */
-        #letter-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(40, 0, 15, 0.85);
-            display: none; justify-content: center; align-items: center;
-            z-index: 1000;
+        /* Hata durumunda sallanma animasyonu */
+        .shake {
+            animation: shake 0.5s;
         }
 
-        #letter-box {
-            position: absolute; right: -150%; width: 450px;
-            background: #fffef2; padding: 50px;
-            box-shadow: -20px 20px 50px rgba(0,0,0,0.5);
-            border-left: 12px solid var(--gold);
-            transform: rotate(-1deg);
-            transition: right 1.8s cubic-bezier(0.19, 1, 0.22, 1);
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
         }
 
-        #letter-box h2 { color: var(--deep-rose); margin-top: 0; font-size: 28px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        #letter-box p { font-size: 20px; line-height: 1.8; color: #222; font-style: italic; white-space: pre-line; }
-
-        #close-btn { 
-            margin-top: 30px; padding: 15px 30px; 
-            background: var(--deep-rose); color: white; border: none; 
-            border-radius: 4px; cursor: pointer; font-size: 16px; letter-spacing: 1px;
+        .envelope-icon {
+            font-size: 80px;
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: bounce 2s infinite;
         }
 
-        #compliment-banner {
-            position: fixed; bottom: 40px; font-size: 26px;
-            color: var(--deep-rose); text-align: center;
-            width: 80%; font-style: italic; font-weight: bold;
-            text-shadow: 1px 1px 1px white;
-            animation: fadeEffect 1s;
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
         }
 
-        @keyframes fadeEffect { from { opacity: 0; } to { opacity: 1; } }
+        input {
+            padding: 12px;
+            width: 80%;
+            border: 2px solid #fbb6ce;
+            border-radius: 15px;
+            outline: none;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            background: #d53f8c;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        #error-msg {
+            color: #e53e3e;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            height: 20px; /* Yer tutması için */
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        /* Mesaj İçeriği */
+        #secret-content {
+            display: none;
+            background: #ffffff;
+            width: 90%;
+            max-width: 550px;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+            background-image: radial-gradient(#fed7e2 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 2px solid #fbb6ce;
+            animation: fadeIn 1s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        h2 { font-family: 'Dancing Script', cursive; color: #b83280; font-size: 2.5rem; text-align: center; }
+        .long-message { color: #4a5568; line-height: 1.8; white-space: pre-line; border-top: 1px solid #fed7e2; padding-top: 20px; }
+        .signature { font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: #d53f8c; text-align: right; margin-top: 30px; }
     </style>
 </head>
 <body>
 
-<div id="header">
-    <h1>✨ Kalbimdeki En Özel Yere Yolculuk ✨</h1>
-    <div style="font-size: 24px;">Sevgi Puanın: <span id="score">0</span></div>
-</div>
-
-<div id="game-area">
-    <div id="target">❤️</div>
-</div>
-
-<div id="compliment-banner">Seni ne kadar çok sevdiğimi görmek için başla ablacığım...</div>
-
-<div id="letter-overlay">
-    <div id="letter-box">
-        <h2 id="m-title"></h2>
-        <p id="m-text"></p>
-        <button id="close-btn" onclick="closeLetter()">Yolculuğa Devam Et 🏹</button>
+    <div id="auth-ui">
+        <div class="envelope-icon">✉️</div>
+        <h3>Canım Ablama...</h3>
+        <p style="color: #718096; font-size: 0.9rem;">Mektubu açmak için şifreyi gir:</p>
+        <input type="text" id="password" placeholder="Şifre nedir?">
+        <div id="error-msg">Ablam olduğuna emin misin? 😊</div>
+        <button onclick="checkPassword()">Mektubu Oku ❤️</button>
     </div>
-</div>
 
-<script>
-    const target = document.getElementById('target');
-    const scoreText = document.getElementById('score');
-    const complimentBanner = document.getElementById('compliment-banner');
-    const overlay = document.getElementById('letter-overlay');
-    const letterBox = document.getElementById('letter-box');
-    
-    let score = 0;
+    <div id="secret-content">
+        <h2>Canım Ablam, ✨</h2>
+        <div class="long-message">
+            Bazen sana bunu yeterince söyleyemiyorum ama iyi ki varsın. Hayatımda senin gibi birinin olması gerçekten büyük bir şans. Ne zaman zor bir an yaşasam, bilmesen bile varlığın bana güç veriyor. Sen sadece ablam değil, aynı zamanda yol göstericim, sırdaşım ve en güvenli limanımsın.
 
-    const compliments = [
-        "Sen benim bu hayattaki en güvenli limanımsın... ✨",
-        "Küçüklüğümden beri kahramanım hep sendin abla. ❤️",
-        "Sadece sesini duymak bile içimi huzurla kaplıyor. 🕊️",
-        "Senin gibi yüreği güzel bir insanı tanımak ne büyük şans... 💎",
-        "Yüzündeki tek bir gülümseme için dünyaları veririm. 😊",
-        "Merhametin ve sevginle dünyayı güzelleştiriyorsun. 🌸",
-        "Zorlandığımda elimi tutan ilk el hep senin elindi. 🤝",
-        "Senin sabrın ve bilgeliğin bana her zaman ışık tutuyor. 💡",
-        "Dünya bir yana, senin tek bir damla gözyaşın bir yana... 🌹",
-        "İyi ki aynı ağacın dallarıyız, iyi ki benim ablamsın. 🌳",
-        "Seninle sessizce oturmak bile en güzel terapi. ☕",
-        "Başarılarını izlerken göğsüm gururla kabarıyor. 🏆",
-        "Kalbimin en derin yerinde senin yerin bambaşka... ❤️",
-        "Sen benim çocukluğumun en güzel hatırasısın. 📸"
-    ];
+            Gülüşün evin havasını değiştiriyor, konuşman içimi rahatlatıyor. Küçükken belki fark etmiyordum ama büyüdükçe senin kıymetini daha iyi anlıyorum. Sabırla beni dinlemen, bazen kızsan bile arkamda durman… Bunların hepsi benim için çok değerli.
 
-    const messages = {
-        25: {
-            title: "İlk Adım: Sorumluluğun...",
-            text: "Biliyorum, bazen kardeşin olmak zordu ama sen her zaman en büyük sabırla ve sevgiyle yaklaştın bana. 25 puan senin o sonsuz sabrın için..."
-        },
-        50: {
-            title: "Yolun Yarısı: Koruyuculuğun...",
-            text: "Düştüğümde beni kaldıran, kimse anlamadığında beni sadece gözlerimden anlayan sensin. 50 puan, senin o koruyucu kanatların için..."
-        },
-        75: {
-            title: "Son Durak Öncesi: Dostluğun...",
-            text: "Sen sadece ablam değil, kimseye anlatamadığım sırlarımı emanet ettiğim tek dostumsun. Senin varlığın benim en büyük hazinem."
-        },
-        100: {
-            title: "Canım Ablama... 🌸",
-            text: "Seninle geçen her gün benim için çok değerli. Sadece bir abla değil, aynı zamanda en iyi dostsun. Bu küçük oyunu senin ne kadar harika olduğunu hatırlatmak için yaptım.\n\nSeni Çok Seviyorum, İyi Ki Varsın!\n\n— Kardeşin ❤️"
-        }
-    };
+            Sen güçlü birisin. Hem kalbi güzel hem de içi tertemiz birisin. Hayatta ne yaparsan yap, nereye gidersen git, bil ki seni seven ve seninle gurur duyan bir kardeşin var. Her zaman yanında olacağım.
 
-    function moveTarget() {
-        const area = document.getElementById('game-area');
-        const x = Math.random() * (area.clientWidth - 120);
-        const y = Math.random() * (area.clientHeight - 120);
-        target.style.left = x + 'px';
-        target.style.top = y + 'px';
-        
-        if(score > 80) target.style.transform = "scale(0.8)";
-    }
+            İyi ki benim ablam olmuşsun. Seni çok seviyorum.
+        </div>
+        <div class="signature">Kardeşin 💖</div>
+    </div>
 
-    target.addEventListener('click', () => {
-        score++;
-        scoreText.innerText = score;
-        
-        if (messages[score]) {
-            if(score === 100) {
-                fireConfetti();
-                document.getElementById('close-btn').innerText = "Seni Çok Seviyorum! ❤️";
+    <script>
+        function checkPassword() {
+            const passInput = document.getElementById('password');
+            const errorMsg = document.getElementById('error-msg');
+            const authUi = document.getElementById('auth-ui');
+            
+            // Şifre Kontrolü
+            if (passInput.value.toLowerCase() === "ponçik") {
+                authUi.style.display = 'none';
+                document.getElementById('secret-content').style.display = 'block';
+                fireworks();
+            } else {
+                // Hata durumu: Sallanma ve nazik mesaj
+                authUi.classList.add('shake');
+                errorMsg.style.opacity = '1';
+                
+                // Animasyonu tekrar edebilmesi için sınıfa süre sonunda kaldırıyoruz
+                setTimeout(() => {
+                    authUi.classList.remove('shake');
+                }, 500);
             }
-            showLetter(messages[score].title, messages[score].text);
-        } else {
-            complimentBanner.style.animation = 'none';
-            void complimentBanner.offsetWidth; // Animasyonu sıfırla
-            complimentBanner.style.animation = 'fadeEffect 1s';
-            complimentBanner.innerText = compliments[Math.floor(Math.random() * compliments.length)];
-            moveTarget();
         }
-    });
 
-    function fireConfetti() {
-        var duration = 5 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
+        function fireworks() {
+            var duration = 8 * 1000;
+            var end = Date.now() + duration;
 
-        var interval = setInterval(function() {
-            var timeLeft = animationEnd - Date.now();
-            if (timeLeft <= 0) return clearInterval(interval);
-            var particleCount = 50 * (timeLeft / duration);
-            confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
-        }, 250);
-    }
+            (function frame() {
+                confetti({
+                    particleCount: 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ff4d6d', '#ffffff']
+                });
+                confetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#ff4d6d', '#ffffff']
+                });
 
-    function showLetter(title, text) {
-        document.getElementById('m-title').innerText = title;
-        document.getElementById('m-text').innerText = text;
-        overlay.style.display = 'flex';
-        setTimeout(() => { letterBox.style.right = '15%'; }, 100);
-    }
-
-    function closeLetter() {
-        letterBox.style.right = '-150%';
-        setTimeout(() => { 
-            overlay.style.display = 'none'; 
-            if(score < 100) moveTarget();
-        }, 800);
-    }
-
-    moveTarget();
-</script>
-
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    </script>
 </body>
 </html>
