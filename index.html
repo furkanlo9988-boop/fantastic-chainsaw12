@@ -2,202 +2,212 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Canım Ablama Sürpriz</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merve (Ponçik) İçin Sonsuz Sevgiyle</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Montserrat:wght@900&family=Great+Vibes&family=Sacramento&display=swap');
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #0a0a12 0%, #000 100%);
+            overflow: hidden; font-family: 'Montserrat', sans-serif;
         }
 
-        body {
-            background: linear-gradient(135deg, #fff5f5 0%, #fed7e2 100%);
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+
+        /* Başlangıç Butonu */
+        #start-trigger {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 100; padding: 25px 50px; background: none; border: 2px solid #ffd700;
+            color: #ffd700; font-family: 'Great Vibes', cursive; font-size: 2.5rem;
+            cursor: pointer; border-radius: 50px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+            transition: 0.5s;
+        }
+        #start-trigger:hover { background: #ffd700; color: #000; box-shadow: 0 0 50px rgba(255, 215, 0, 0.5); }
+
+        /* Kayan Yazı Katmanı */
+        #marquee-container {
+            position: absolute; top: 15%; width: 100%;
+            overflow: hidden; display: none; z-index: 50;
+        }
+        .flowing-text {
+            display: inline-block; white-space: nowrap;
+            font-size: 3.5rem; font-family: 'Sacramento', cursive;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: flow 10s linear forwards;
         }
 
-        /* Giriş Paneli */
-        #auth-ui {
-            text-align: center;
-            background: white;
-            padding: 30px 20px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(255, 105, 180, 0.2);
-            width: 100%;
-            max-width: 350px;
-            position: relative;
+        /* Kalp ve Yazı */
+        #heart-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 60; text-align: center; opacity: 0; pointer-events: none;
+            transition: opacity 2s;
+        }
+        #heart-overlay h2 {
+            color: white; font-family: 'Great Vibes', cursive; font-size: 4.5rem;
+            text-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055; margin: 0;
         }
 
-        .shake { animation: shake 0.5s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
-
-        .envelope-icon {
-            font-size: 60px;
-            margin-bottom: 10px;
-            display: inline-block;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-15px);}
-            60% {transform: translateY(-8px);}
-        }
-
-        h3 { color: #d53f8c; font-size: 1.2rem; margin-bottom: 15px; }
-
-        input {
-            padding: 14px;
-            width: 100%;
-            border: 2px solid #fbb6ce;
-            border-radius: 12px;
-            outline: none;
-            font-size: 16px; /* Mobil tarayıcı zoom yapmasın diye 16px */
-            text-align: center;
-        }
-
-        button {
-            padding: 14px 25px;
-            background: #d53f8c;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-weight: bold;
-            width: 100%;
-            font-size: 1rem;
-        }
-
-        #error-msg {
-            color: #e53e3e;
-            font-size: 0.8rem;
-            margin-top: 8px;
-            opacity: 0;
-            transition: 0.3s;
-        }
-
-        /* Mesaj İçeriği (Mobil Scroll Desteği) */
-        #secret-content {
+        /* Final Mektubu */
+        #final-letter-wrap {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            z-index: 200; transition: all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: none;
-            background: #ffffff;
-            width: 100%;
-            max-width: 500px;
-            padding: 30px 20px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            background-image: radial-gradient(#fed7e2 0.5px, transparent 0.5px);
-            background-size: 15px 15px;
-            border: 2px solid #fbb6ce;
-            max-height: 90vh; /* Ekrandan taşmaması için */
-            overflow-y: auto; /* İçerik uzunsa kaydırılabilir */
-            animation: fadeIn 0.8s;
         }
+        .parchment {
+            width: 380px; min-height: 480px; background: #f4e4bc;
+            border-radius: 5px; box-shadow: 0 0 60px rgba(0,0,0,0.9), inset 0 0 100px rgba(139,69,19,0.2);
+            padding: 40px; color: #3d2b1f; position: relative; border: 1px solid #d2b48c;
+        }
+        .parchment h3 { font-family: 'Great Vibes', cursive; font-size: 2.5rem; margin-top: 0; border-bottom: 1px solid rgba(61,43,31,0.2); }
+        .parchment p { font-family: 'Dancing Script', cursive; font-size: 1.4rem; line-height: 1.5; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        h2 { font-family: 'Dancing Script', cursive; color: #b83280; font-size: 2rem; text-align: center; margin-bottom: 15px; }
+        @keyframes flow { from { transform: translateX(100%); } to { transform: translateX(-120%); } }
         
-        .long-message { 
-            color: #4a5568; 
-            line-height: 1.6; 
-            font-size: 1rem;
-            white-space: pre-line; 
-            border-top: 1px solid #fed7e2; 
-            padding-top: 15px;
-        }
-        
-        .signature { 
-            font-family: 'Dancing Script', cursive; 
-            font-size: 1.5rem; 
-            color: #d53f8c; 
-            text-align: right; 
-            margin-top: 20px; 
-        }
+        .show { opacity: 1 !important; transform: translate(-50%, -50%) scale(1) !important; display: block !important; }
     </style>
 </head>
 <body>
 
-    <div id="auth-ui">
-        <div class="envelope-icon">✉️</div>
-        <h3>Canım Ablama...</h3>
-        <p style="color: #718096; font-size: 0.85rem;">Mektubu açmak için şifreyi gir:</p>
-        <input type="text" id="password" placeholder="Şifre nedir?">
-        <div id="error-msg">Ablam olduğuna emin misin? 😊</div>
-        <button onclick="checkPassword()">Mektubu Oku ❤️</button>
+    <button id="start-trigger">Merve (Ponçik) İçin Bir Mesajın Var</button>
+
+    <div id="marquee-container">
+        <div class="flowing-text">Canım Ablam, Dünyanın En Tatlı Ponçiği, İlham Kaynağım Merve... ✨</div>
     </div>
 
-    <div id="secret-content">
-        <h2>Canım Ablam, ✨</h2>
-        <div class="long-message">
-            Bazen sana bunu yeterince söyleyemiyorum ama iyi ki varsın. Hayatımda senin gibi birinin olması gerçekten büyük bir şans. Ne zaman zor bir an yaşasam, bilmesen bile varlığın bana güç veriyor. Sen sadece ablam değil, aynı zamanda yol göstericim, sırdaşım ve en güvenli limanımsın.
+    <div id="heart-overlay">
+        <h2>Seni Çok Seviyorum</h2>
+    </div>
 
-            Gülüşün evin havasını değiştiriyor, konuşman içimi rahatlatıyor. Küçükken belki fark etmiyordum ama büyüdükçe senin kıymetini daha iyi anlıyorum. Sabırla beni dinlemen, bazen kızsan bile arkamda durman… Bunların hepsi benim için çok değerli.
-
-            Sen güçlü birisin. Hem kalbi güzel hem de içi tertemiz birisin. Hayatta ne yaparsan yap, nereye gidersen git, bil ki seni seven ve seninle gurur duyan bir kardeşin var. Her zaman yanında olacağım.
-
-            İyi ki benim ablam olmuşsun. Seni çok seviyorum.
+    <div id="final-letter-wrap">
+        <div class="parchment">
+            <h3>Canım Ablam Merve,</h3>
+            <p>Hayatın karmaşasında her zaman parlayan bir yıldız oldun benim için. Sadece bir abla değil, en iyi dost, en güvenilir liman ve dünyanın en tatlı Ponçik'isin.</p>
+            <p>Bu küçük dijital dünya, senin bendeki değerini anlatmaya yetmez ama her bir kod satırı senin ne kadar özel olduğunu hatırlatmak için yazıldı.</p>
+            <p>Varlığın için teşekkürler. Hep mutlu ol, çünkü sen her şeyin en güzelini hak ediyorsun.</p>
+            <p style="text-align: right;">— Kardeşin ❤️</p>
+            <div style="cursor:pointer; opacity:0.5; font-size:0.8rem; margin-top:20px;" onclick="location.reload()">TEKRAR İZLE</div>
         </div>
-        <div class="signature">Kardeşin 💖</div>
     </div>
+
+    <canvas id="canvas"></canvas>
 
     <script>
-        function checkPassword() {
-            const passInput = document.getElementById('password');
-            const errorMsg = document.getElementById('error-msg');
-            const authUi = document.getElementById('auth-ui');
-            
-            if (passInput.value.toLowerCase() === "ponçik") {
-                authUi.style.display = 'none';
-                const secret = document.getElementById('secret-content');
-                secret.style.display = 'block';
-                fireworks();
-            } else {
-                authUi.classList.add('shake');
-                errorMsg.style.opacity = '1';
-                setTimeout(() => {
-                    authUi.classList.remove('shake');
-                }, 500);
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const btn = document.getElementById('start-trigger');
+        const marquee = document.getElementById('marquee-container');
+        const heartOverlay = document.getElementById('heart-overlay');
+        const letterWrap = document.getElementById('final-letter-wrap');
+
+        let w, h, particles = [];
+        let state = 'init'; 
+
+        function init() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', init);
+        init();
+
+        function getHeartPoint(t) {
+            let x = 16 * Math.pow(Math.sin(t), 3);
+            let y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+            return { x: x * 15, y: y * 18 };
+        }
+
+        class Particle {
+            constructor(x, y, color, isHeart = false) {
+                this.x = x; this.y = y;
+                this.color = color;
+                this.isHeart = isHeart;
+                this.vel = { x: (Math.random() - 0.5) * 12, y: (Math.random() - 0.5) * 12 };
+                this.alpha = 1;
+                this.friction = 0.95;
+                this.dest = { x: x, y: y };
+                this.decay = Math.random() * 0.01 + 0.005;
+            }
+            update() {
+                if (this.isHeart && state === 'heart') {
+                    this.x += (this.dest.x - this.x) * 0.07;
+                    this.y += (this.dest.y - this.y) * 0.07;
+                } else {
+                    this.vel.x *= this.friction;
+                    this.vel.y *= this.friction;
+                    this.x += this.vel.x;
+                    this.y += this.vel.y;
+                    this.alpha -= this.decay;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.shadowBlur = this.isHeart ? 15 : 5;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.isHeart ? 2.5 : 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
             }
         }
 
-        function fireworks() {
-            var duration = 5 * 1000;
-            var end = Date.now() + duration;
-
-            (function frame() {
-                confetti({
-                    particleCount: 2,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0, y: 0.8 },
-                    colors: ['#ff4d6d', '#ffffff']
-                });
-                confetti({
-                    particleCount: 2,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1, y: 0.8 },
-                    colors: ['#ff4d6d', '#ffffff']
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            }());
+        function spawnExplosion(x, y) {
+            const colors = ['#ff0055', '#00d2ff', '#ffd700', '#fff'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 60; i++) particles.push(new Particle(x, y, color));
         }
+
+        function createHeart() {
+            state = 'heart';
+            particles = [];
+            for (let t = 0; t < Math.PI * 2; t += 0.04) {
+                const pos = getHeartPoint(t);
+                const p = new Particle(w / 2, h / 2, '#ff0055', true);
+                p.dest = { x: pos.x + w / 2, y: pos.y + h / 2 };
+                particles.push(p);
+            }
+            heartOverlay.classList.add('show');
+        }
+
+        function loop() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, w, h);
+
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if (!p.isHeart && p.alpha <= 0) particles.splice(i, 1);
+            });
+            requestAnimationFrame(loop);
+        }
+
+        btn.addEventListener('click', () => {
+            btn.style.display = 'none';
+            state = 'fireworks';
+            loop();
+            
+            // 1. Yazı ve Havai Fişekler başlar
+            marquee.style.display = 'block';
+            const fwInterval = setInterval(() => {
+                if(state === 'fireworks') spawnExplosion(Math.random() * w, Math.random() * h * 0.7);
+            }, 450);
+
+            // 2. Kalp Formasyonu (10 saniye sonra yazı bitince)
+            setTimeout(() => {
+                clearInterval(fwInterval);
+                marquee.style.opacity = '0';
+                createHeart();
+                
+                // 3. Final Mektubu
+                setTimeout(() => {
+                    heartOverlay.style.opacity = '0';
+                    state = 'letter';
+                    letterWrap.classList.add('show');
+                }, 5000);
+            }, 10000);
+        });
     </script>
 </body>
 </html>
